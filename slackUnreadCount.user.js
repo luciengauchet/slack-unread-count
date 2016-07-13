@@ -1,34 +1,29 @@
 // ==UserScript==
-// @name        Unread Count for SLack
+// @name        Unread Count for Slack
 // @namespace   luciengauchet@github.com
-// @include     *://*.slack.com/*
-// @version     5
-// @grant       none
-// @require     http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js
+// @description An unread counter for Slack
+// @version     1.1.0
+// @match        *://*.slack.com/*
+// @grant        none
 // ==/UserScript==
 
-function sleep(seconds){
-    var waitUntil = new Date().getTime() + seconds*1000;
-    while(new Date().getTime() < waitUntil) true;
+function unreadCounter() {
+  setInterval(function() {
+    var unreadCount = 0;
+    $('.unread_highlight').each(function() {unreadCount += parseFloat($(this).html()); });
+    unreadCount += $('li.unread').size();
+    var re = /\((\d*)\)$/;
+    var str = document.title;
+    var subst = '(' + unreadCount + ')';
+    var m;
+    var result = document.title + ' ' + subst;
+    if ((m = re.exec(str)) !== null) {
+      result = str.replace(re, subst);
+    }
+    document.title = result;
+  }, 10000);
 }
 
-function main() {
-setInterval(
-    function(){
-        var unreadCount = 0;
-        $('.unread_highlight').each(function(){unreadCount += parseFloat($(this).html());});
-        var re = /\((\d*)\)$/;
-        var str = document.title;
-        var subst = '('+unreadCount+')'; 
-        var m;
-        var result = document.title+' '+subst;
-        if ((m = re.exec(str)) !== null) {
-            var result = str.replace(re, subst);}
-        document.title = result;
-    },10000);}
-
-
-$(window).load(function(){ 
-    sleep(100);
-    main();
-})
+if (document.body) {
+  unreadCounter();
+};
